@@ -1,0 +1,41 @@
+import keras
+from keras.models import Sequential
+from keras.models import Input
+from keras.layers import Conv2D,Conv1D, MaxPooling2D # Convolution, MaxPooling respectively
+from keras.layers import Dense, Flatten, Dropout # FullyConnected, Reshape respectively
+input_shape = (1, 28, 28)
+
+model = Sequential()
+conv1=Conv2D(28, kernel_size=(3, 3), padding='same', input_shape=input_shape, activation='relu')
+model.add(conv1)
+model.add(Flatten())
+model.add(Dense(30))
+model.add(Dense(10, activation='softmax'))
+print(model.summary())
+loss=keras.losses.categorical_crossentropy
+optimizer = keras.optimizers.Adamax(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
+model.compile(loss=loss,
+              optimizer=optimizer,
+              metrics=['accuracy'])
+from keras.datasets import mnist
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+x_train = x_train.reshape(x_train.shape[0], 1, 28, 28)
+x_test = x_test.reshape(x_test.shape[0], 1, 28, 28)
+   
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
+x_train /= 255
+x_test /= 255
+#
+num_classes = 10
+y_train = keras.utils.to_categorical(y_train, 10)
+y_test = keras.utils.to_categorical(y_test, 10)
+# 
+batch_size = 20
+epochs = 10
+
+model.fit(x_train, y_train,
+          batch_size=batch_size,
+          epochs=epochs,
+          verbose=1,
+          validation_data=(x_test, y_test))
